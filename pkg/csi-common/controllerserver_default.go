@@ -23,7 +23,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var _ csi.ControllerServer = (*DefaultControllerServer)(nil)
+
 type DefaultControllerServer struct {
+	csi.UnimplementedControllerServer
 	Driver *CSIDriver
 }
 
@@ -81,5 +84,9 @@ func (cs *DefaultControllerServer) ControllerExpandVolume(context.Context, *csi.
 
 // ControllerGetVolume is still an alpha feature, we do not support it now
 func (cs *DefaultControllerServer) ControllerGetVolume(ctx context.Context, request *csi.ControllerGetVolumeRequest) (*csi.ControllerGetVolumeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Unimplemented")
+}
+
+func (cs *DefaultControllerServer) ControllerModifyVolume(context.Context, *csi.ControllerModifyVolumeRequest) (*csi.ControllerModifyVolumeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "Unimplemented")
 }
