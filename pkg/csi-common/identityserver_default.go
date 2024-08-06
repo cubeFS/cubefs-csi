@@ -23,7 +23,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var _ csi.IdentityServer = (*DefaultIdentityServer)(nil)
+
 type DefaultIdentityServer struct {
+	csi.UnimplementedIdentityServer
 	Driver *CSIDriver
 }
 

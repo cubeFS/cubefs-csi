@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
-	csicommon "github.com/cubefs/cubefs-csi/pkg/csi-common"
 	"github.com/golang/glog"
 	"golang.org/x/net/context"
 	"golang.org/x/sys/unix"
@@ -34,6 +33,8 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/mount"
+
+	csicommon "github.com/cubefs/cubefs-csi/pkg/csi-common"
 )
 
 type nodeServer struct {
@@ -102,7 +103,7 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 }
 
 func (ns *nodeServer) mount(targetPath, volumeName string, param map[string]string) (retErr error) {
-	defer func(){
+	defer func() {
 		if retErr != nil {
 			glog.Errorf("volume mount failed, remove the targetPath: %v, error: %v", targetPath, retErr.Error())
 			if err := os.Remove(targetPath); err != nil {
@@ -119,28 +120,28 @@ func (ns *nodeServer) mount(targetPath, volumeName string, param map[string]stri
 
 	if err := mount.CleanupMountPoint(targetPath, ns.mounter, false); err != nil {
 		retErr = status.Errorf(codes.Internal, "CleanupMountPoint fail, stagingTargetPath: %v error: %v", targetPath, err)
-		return 
+		return
 	}
 
 	if err := createMountPoint(targetPath); err != nil {
 		retErr = status.Errorf(codes.Internal, "createMountPoint fail, stagingTargetPath: %v error: %v", targetPath, err)
-		return 
+		return
 	}
 
 	cfsServer, err := newCfsServer(volumeName, param)
 	if err != nil {
 		retErr = status.Errorf(codes.InvalidArgument, "new cfs server failed: %v", err)
-		return 
+		return
 	}
 
 	if err := cfsServer.persistClientConf(targetPath); err != nil {
 		retErr = status.Errorf(codes.Internal, "persist client config file failed: %v", err)
-		return 
+		return
 	}
 
 	if err := cfsServer.runClient(); err != nil {
 		retErr = status.Errorf(codes.Internal, "mount failed: %v", err)
-		return 
+		return
 	}
 
 	return

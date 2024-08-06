@@ -23,7 +23,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var _ csi.NodeServer = (*DefaultNodeServer)(nil)
+
 type DefaultNodeServer struct {
+	csi.UnimplementedNodeServer
 	Driver *CSIDriver
 }
 
